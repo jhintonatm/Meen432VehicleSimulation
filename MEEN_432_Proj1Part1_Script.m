@@ -6,6 +6,9 @@ w_k   = out.w_k.data;      % Data from w_k timeseries
 
 
 
+
+   
+
 figure;
 plot(time, w_dot, 'LineWidth', 1.5);
 hold on;
@@ -15,3 +18,4 @@ ylabel('Values');
 legend('w\_dot', 'w\_k');
 title('Simulation Outputs');
 grid on;
+
