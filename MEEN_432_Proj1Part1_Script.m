@@ -4,7 +4,18 @@ tau = 1;
 b = 1;
 w_initial = 1;
 
-out = sim('MEEN_432_Proj1Part1');
+% Pick solver: 'ode1' (Euler), 'ode4' (RK4 fixed step)
+solver = 'ode4';
+
+model = 'MEEN_432_Proj1Part1';
+load_system(model);
+
+set_param(model, 'SolverType', 'Fixed-step', ...
+                     'Solver', solver, ...
+                     'FixedStep', num2str(time_step));
+
+% Now run
+out = sim(model);
 
 time = out.tout;
 w_dot = out.w_dot.data;    
@@ -16,6 +27,7 @@ true_w = (tau/b) * (1 - exp(-b*time/J)) + w_initial * exp(-b*time/J);
 % Error
 error = w_k - true_w;   
 
+% Plot
 figure;
 plot(time, w_dot, 'LineWidth', 1.5);
 hold on;
@@ -26,4 +38,3 @@ ylabel('Values');
 legend('w\_dot', 'w\_k', 'error');
 title('Simulation Outputs');
 grid on;
-
