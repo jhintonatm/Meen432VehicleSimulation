@@ -1,4 +1,4 @@
-time_step = .1;
+time_step = .001;
 J = 1;
 tau = 10;
 b = 1;
@@ -21,6 +21,8 @@ time = out.tout;
 w_dot = out.w_dot.data;    
 w_k   = out.w_k.data;      
 
+comp_time = out.SimulationMetadata.TimingInfo.ExecutionElapsedWallTime;
+
 % Analytic solution (vectorized)
 true_w = (tau/b) * (1 - exp(-b*time/J)) + w_initial * exp(-b*time/J);
 
@@ -39,3 +41,4 @@ ylabel('Values');
 legend('true w', 'w_k', 'error');
 title('Simulation Outputs');
 grid on;
+
