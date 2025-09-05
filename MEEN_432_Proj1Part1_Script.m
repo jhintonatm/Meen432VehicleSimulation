@@ -1,8 +1,8 @@
 time_step = 0.01;
 J = 1;
-tau = 10;
+tau = 1;
 b = 1;
-w_initial = 0;
+w_initial = 1;
 
 out = sim('MEEN_432_Proj1Part1');
 
@@ -26,3 +26,4 @@ ylabel('Values');
 legend('w\_dot', 'w\_k', 'error');
 title('Simulation Outputs');
 grid on;
+
