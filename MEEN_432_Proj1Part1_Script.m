@@ -14,6 +14,8 @@ set_param(model, 'SolverType', 'Fixed-step', ...
                      'Solver', solver, ...
                      'FixedStep', num2str(time_step));
 
+
+
 % Now run
 out = sim(model);
 
@@ -43,4 +45,5 @@ ylabel('Values');
 legend('true w', 'w_k', 'error', 'theta');
 title('Simulation Outputs');
 grid on;
+
 
