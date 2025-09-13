@@ -1,7 +1,7 @@
 time_steps = [0.001, 1];
 solvers = {'ode1', 'ode4', 'ode45'};
 
-j1 = 1;
+j1 = 100;
 j2 = 1;
 tau_applied = 10;
 tau_load = 1;
@@ -83,5 +83,6 @@ for t = 1:numel(time_steps)
     grid on;
 end
 sgtitle('Comparison by Time Step (different solvers on same plot)');
+
 
 
