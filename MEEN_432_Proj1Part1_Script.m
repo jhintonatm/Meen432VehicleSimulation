@@ -1,49 +1,85 @@
-time_step = .001;
-J = 1;
-tau = 10;
-b = 1;
-w_initial = 0;
+time_steps = [0.001, 1];
+solvers = {'ode1', 'ode4', 'ode45'};
 
-% Pick solver: 'ode1' (Euler), 'ode4' (RK4 fixed step)
-solver = 'ode1';
+j1 = 1;
+j2 = 1;
+tau_applied = 10;
+tau_load = 1;
+b1 = 1;
+b2 = 1;
+w_0 = 0;
 
 model = 'MEEN_432_Proj1Part1';
 load_system(model);
 
-set_param(model, 'SolverType', 'Fixed-step', ...
-                     'Solver', solver, ...
-                     'FixedStep', num2str(time_step));
+results = struct();
 
+% --- Run simulations for all combinations ---
+for s = 1:numel(solvers)
+    for t = 1:numel(time_steps)
+        solver = solvers{s};
+        dt = time_steps(t);
 
+        % configure solver
+        set_param(model, 'SolverType', 'Fixed-step', ...
+                         'Solver', solver, ...
+                         'FixedStep', num2str(dt));
 
-% Now run
-out = sim(model);
+        % measure simulation CPU time
+        tic;
+        out = sim(model);
+        sim_time = toc;
 
-time = out.tout;
-w_dot = out.w_dot.data;    
-w_k   = out.w_k.data;   
-theta = out.theta.data;
+        % always take time from the signal itself
+        time = out.w.Time;
+        w = out.w.Data;
 
-comp_time = out.SimulationMetadata.TimingInfo.ExecutionElapsedWallTime;
+        % analytic solution using that time vector
+        true_w = ((tau_applied - tau_load) / (b1 + b2)) .* ...
+                 (1 - exp(-(b1 + b2) .* time / (j1 + j2))) + ...
+                 w_0 .* exp(-(b1 + b2) .* time / (j1 + j2));
 
-% Analytic solution (vectorized)
-true_w = (tau/b) * (1 - exp(-b*time/J)) + w_initial * exp(-b*time/J);
+        % store results
+        results.(solver)(t).time = time;
+        results.(solver)(t).w = w;
+        results.(solver)(t).true_w = true_w;
+        results.(solver)(t).dt = dt;
+        results.(solver)(t).sim_time = sim_time;
+    end
+end
 
-% Error
-error = w_k - true_w;   
-max_error = max(error)
-
-% Plot
+%% --- Plot version 1: Each solver gets its own subplot ---
 figure;
-plot(time, true_w, 'LineWidth', 1.5);
-hold on;
-plot(time, w_k, '--', 'LineWidth', 1.5);
-plot(time, error, ':', 'LineWidth', 1.5);
+for s = 1:numel(solvers)
+    subplot(1, numel(solvers), s);
+    hold on;
+    for t = 1:numel(time_steps)
+        r = results.(solvers{s})(t)
+        plot(r.time, r.w, '--', 'LineWidth', 1.5, ...
+            'DisplayName', sprintf('dt=%.1f (%.4f s)', r.dt, r.sim_time));
+    end
+    xlabel('Time (s)');
+    ylabel('w');
+    title(sprintf('Solver: %s', solvers{s}));
+    legend show;
+    grid on;
+end
+sgtitle('Comparison by Solver (different dt on same plot)');
 
-xlabel('Time (s)');
-ylabel('Values');
-legend('true w', 'w_k', 'error', 'theta');
-title('Simulation Outputs');
-grid on;
-
-
+%% --- Plot version 2: Each timestep gets its own subplot ---
+figure;
+for t = 1:numel(time_steps)
+    subplot(1, numel(time_steps), t);
+    hold on;
+    for s = 1:numel(solvers)
+        r = results.(solvers{s})(t);
+        plot(r.time, r.w, '--', 'LineWidth', 1.5, ...
+            'DisplayName', sprintf('%s (%.4f s)', solvers{s}, r.sim_time));
+    end
+    xlabel('Time (s)');
+    ylabel('w');
+    title(sprintf('dt = %.3f s', time_steps(t)));
+    legend show;
+    grid on;
+end
+sgtitle('Comparison by Time Step (different solvers on same plot)');
