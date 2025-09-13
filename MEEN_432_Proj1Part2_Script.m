@@ -9,7 +9,7 @@ b1 = 1;
 b2 = 1;
 w_0 = 0;
 
-model = 'MEEN_432_Proj1Part1';
+model = 'MEEN_432_Proj1Part2';
 load_system(model);
 
 results = struct();
@@ -83,4 +83,5 @@ for t = 1:numel(time_steps)
     grid on;
 end
 sgtitle('Comparison by Time Step (different solvers on same plot)');
+
 
