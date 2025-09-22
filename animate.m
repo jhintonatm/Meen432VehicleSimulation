@@ -40,7 +40,7 @@ for i = 1:length(car_X)
     x = car_X(i);
     y = car_Y(i);
     psi = car_psi(i);
-    addpoints(h,x,y) % this will add points as an animated line based on the center line path components
+    
   
     car = [-L/2 -width/2; -L/2 width/2; L/2 width/2; L/2 -width/2]; % array of the vertices of the car
     rcar = rotate(car', 0)'; 
@@ -52,6 +52,40 @@ for i = 1:length(car_X)
     pause(0.05);
     delete(ap)
 end
+function stats = raceStat(car_X, car_Y, car_time, path)
+    % Compute race statistics and check path adherence
+
+    % 1. Total Distance Traveled
+    dx = diff(car_X);
+    dy = diff(car_Y);
+    total_distance = sum(sqrt(dx.^2 + dy.^2));
+
+    % 2. Total Time and Average Speed
+    total_time = car_time(end) - car_time(1);
+    avg_speed = total_distance / total_time;
+
+
+    for i = 1:length(car_X)
+        % Find the closest centerline point to the car
+        dx = path.xpath - car_X(i);
+        dy = path.ypath - car_Y(i);
+        dist = sqrt(dx.^2 + dy.^2);
+        [min_dist, ~] = min(dist);
+    end
+
+    % 5. Package into output struct
+    stats = struct();
+    stats.total_distance = total_distance;
+    stats.total_time = total_time;
+    stats.avg_speed = avg_speed;
+
+
+    % 6. Display basic info
+    fprintf('--- Race Statistics ---\n');
+    fprintf('Total Distance Traveled: %.2f m\n', total_distance);
+    fprintf('Total Time: %.2f s\n', total_time);
+    fprintf('Average Speed: %.2f m/s\n', avg_speed);
+
+end
 race = raceStat(car_X, car_Y, car_time, path)
 hold off
-
