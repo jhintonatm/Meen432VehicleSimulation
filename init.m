@@ -51,3 +51,5 @@ carData.vx_threshold1 = 0.1; % m/s - Threshold for Velocity in X
 % A  = 2.32;           % m^2 - Projected Area
 % Cd = 0.36;           % unitless - Drag Coefficient
 % carData.C2 = 0.5*Rho*A*Cd; % N/(m/s)^2 - Aerodynamic Drag Coefficient
+
+
