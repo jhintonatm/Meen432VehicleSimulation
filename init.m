@@ -52,4 +52,5 @@ carData.vx_threshold1 = 0.1; % m/s - Threshold for Velocity in X
 % Cd = 0.36;           % unitless - Drag Coefficient
 % carData.C2 = 0.5*Rho*A*Cd; % N/(m/s)^2 - Aerodynamic Drag Coefficient
 
+carDataBus = Simulink.Bus.createObject(carData);
 
