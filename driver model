@@ -1,0 +1,81 @@
+function [delta_f, vx] = SimplestDriver(X, Y, psi_int, psi, omega, obj)
+% PID steering using psi_int (integral of heading error) and omega (yaw rate)
+
+% --- track geometry ---
+R   = 200;      % radius (m)
+Lst = 900;      % straight length (m)
+y0  = 0;        % bottom straight
+y1  = 400;      % top straight
+cy  = 200;      % arc centers' y
+cxL = 0;        % left arc center x
+cxR = Lst;      % right arc center x
+
+% --- controller parameters ---
+% PID on heading: delta = delta_ff + Kp*e_psi + Ki*psi_int - Kd*(omega - omega_ref)
+Kp = 1.2;        % proportional on heading error
+Ki = 0.5;        % integral gain (psi_int already integrates e_psi)
+Kd = 0.25;       % derivative gain (on yaw-rate error)
+
+maxSteer = 0.5;  % [rad] steering saturation
+vx = obj.vxd;    % vehicle longitudinal speed
+
+% Defaults
+psi_ref = 0;
+kappa_ref = 0;   % desired curvature (+ left, - right)
+delta_ff = 0;    % feed-forward steering
+
+if X > Lst
+    % -------- Right semicircle (center at cxR,cy), CCW from bottom to top --------
+    % Tangent heading is phi + pi/2
+    phi = atan2(Y - cy, X - cxR);
+    psi_ref = phi + pi/2;
+    kappa_ref = 1/R;           % CCW positive
+    % Geometric + understeer feed-forward (kept from your original style)
+    delta_ff = (obj.lf + obj.lr)*kappa_ref + obj.understeerCoeff * vx^2;
+
+elseif X < 0
+    % -------- Left semicircle (center at cxL,cy), CCW from top to bottom --------
+    phi = atan2(Y - cy, X - cxL);
+    psi_ref = phi + pi/2;
+    kappa_ref = 1/R;           % CCW positive
+    delta_ff = (obj.lf + obj.lr)*kappa_ref + obj.understeerCoeff * vx^2;
+
+else
+    % -------- Inside rectangle (straights) --------
+    if abs(Y) <= (y1-y0)/2
+        % Bottom straight: motion +x => heading 0
+        psi_ref = 0;
+        kappa_ref = 0;
+        delta_ff = 0;e_psi = wrapToPi(psi_ref - psi);
+        delta = delta_ff + Kp*e_psi + Ki*psi_int;
+      
+    else
+        % Top straight: motion -x => heading pi (or -pi)
+        psi_ref = pi;
+        kappa_ref = 0;
+        delta_ff = 0;e_psi = wrapToPi(psi_ref - psi);
+        delta = delta_ff + Kp*e_psi + Ki*psi_int;
+    end
+end
+
+% --- heading error (wrapped to [-pi, pi]) ---
+e_psi = wrapToPi(psi_ref - psi);
+
+% --- yaw-rate reference from curvature ---
+omega_ref = kappa_ref * vx;
+
+% --- PID law using your integral and derivative signals ---
+% integral term: psi_int is assumed to be \int e_psi dt (maintained in Simulink)
+% derivative term: use yaw-rate error (omega - omega_ref), subtract to damp
+delta = delta_ff + Kp*e_psi + Ki*psi_int - Kd*(omega - omega_ref);
+
+% --- saturation ---
+delta_f = min(max(delta, -maxSteer), maxSteer);
+
+end
+
+% ---------- helpers ----------
+function ang = wrapToPi(ang)
+% Wrap any angle to [-pi, pi]
+ang = mod(ang + pi, 2*pi) - pi;
+end
