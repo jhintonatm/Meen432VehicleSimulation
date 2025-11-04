@@ -1,5 +1,5 @@
 %% From a Kinematic Model
-simout = sim("Project_2_Kinematic_Model.slx");
+simout = sim("MEEN_432_Proj4Part1.slx");
 car_X = simout.X.Data;
 car_Y = simout.Y.Data;
 car_psi = simout.psi.Data;
