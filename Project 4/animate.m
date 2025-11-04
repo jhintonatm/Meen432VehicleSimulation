@@ -5,8 +5,8 @@ car_Y = simout.Y.Data;
 car_psi = simout.psi.Data;
 car_time = simout.tout;
 
-path_X = path.xpath;
-path_Y = path.ypath;
+path_X = path().xpath;
+path_Y = path().ypath;
 
 %% From no model
 % xpath = path.xpath;
