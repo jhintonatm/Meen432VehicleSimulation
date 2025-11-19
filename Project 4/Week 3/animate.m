@@ -9,9 +9,9 @@ path_X = path().xpath;
 path_Y = path().ypath;
 
 %% From no model
-% xpath = path.xpath;
-% ypath = path.ypath;
-% theta = path.tpath;
+xpath = path.xpath;
+ypath = path.ypath;
+theta = path.tpath;
 
 %% Animating the patch
 fh = figure();
